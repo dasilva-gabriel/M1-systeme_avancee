@@ -11,13 +11,8 @@ int randomNum(int lower, int upper)
 
 int main(int argc, char const *argv[])
 {
-    /*if (argv != 1)
-    {
-        printf("Un seul argument demandé.");
-    }*/
 
-    int n = 3;
-    // TODO: entrée utilisateur
+    int n = 7;
 
     pid_t pids[n];
     int found[n];
@@ -27,7 +22,7 @@ int main(int argc, char const *argv[])
         if ((pids[i] = fork()) == 0)
         {
             found[i] = 0;
-
+            srand(getpid());
             int num = randomNum(5, 20);
 
             sleep(num);
@@ -36,7 +31,6 @@ int main(int argc, char const *argv[])
 
             exit(0);
         }
-        sleep(1);
     }
 
     for (int i = 0; i < n; ++i)
