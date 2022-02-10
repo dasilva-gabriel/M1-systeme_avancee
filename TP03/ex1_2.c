@@ -8,6 +8,7 @@
 #include <string.h>
 
 #define LEN 5
+#define SIZE 1024
 
 char **split(char *s){
   char **result = (char **)calloc(LEN, sizeof(char *));
@@ -39,47 +40,6 @@ char **split(char *s){
 
   return result;
 }
-
-int init_fic(int argc, char *argv[]) {
-
-    int fic = open(argv[1], O_RDWR | O_CREAT | O_TRUNC, 0775);
-
-    if(fic < 0) {
-        perror("Erreur à l'ouverture...");
-        exit(1);
-    } else {
-
-        if(dup2(fic, STDOUT_FILENO) == -1)  {
-            perror("Erreur à la redirection");
-            exit(1);
-        }
-
-        char *cmd = argv[2];
-
-        int child_process = fork();
-
-        close(fic);
-
-        if (child_process == 0) {
-
-            int output = execvp(cmd, argv+2);
-
-            if (output == -1)
-            {
-                perror("Erreur à l'éxécution de la commande...");
-            }
-
-            exit(0);
-        }
-        else
-        {
-            int wstatus;
-            wait(&wstatus);
-        }
-
-    }
-}
-
 int execute(char **argv1, char **argv2, int fd) {
 
     int pipeCmd[2];
@@ -89,9 +49,43 @@ int execute(char **argv1, char **argv2, int fd) {
         exit(1);
     }
 
-    if(dup2(pipeCmd, STDOUT_FILENO) == -1)  { 
-        perror("Erreur à la redirection");
+    int child_process = fork();
+
+    if (child_process == 0) { 
+
+        if(dup2(pipeCmd[1], STDOUT_FILENO) == -1)  { 
+            perror("Erreur à la redirection");
+            exit(1);
+        }
+
+        close(pipeCmd[1]);
+        close(pipeCmd[0]);
+
+        execvp(argv1[0], argv1);
+        perror("Erreur de commande 1");
         exit(1);
+
+    } else {
+        
+        char buffer[SIZE];
+        
+        int r = 0;
+        if((r = read(pipeCmd[0], buffer, SIZE)) == -1) {
+            perror("Erreur du Read");
+            exit(1);
+        }
+
+        write(fd, buffer, r);
+
+        if(dup2(fd, STDIN_FILENO) == -1) {
+            perror("Erreur de redirection dans le fichier");
+            exit(1);
+        }
+        
+        execvp(argv2[0], argv2);
+        perror("Erreur de commande 2");
+        exit(1);
+        
     }
 
 
@@ -102,6 +96,9 @@ int main(int argc, char *argv[])
     
     //init_fic(argc, argv);
 
-    
+    int fic = open(argv[1], O_RDWR | O_CREAT | O_TRUNC, 0775);
+
+    execute(split(argv[2]), split(argv[3]), fic);
+
     return 0;
 }
