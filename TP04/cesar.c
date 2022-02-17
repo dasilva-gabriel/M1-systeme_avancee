@@ -7,17 +7,24 @@
 #include <unistd.h>
 #include <string.h>
 
+char cesar(char c, int offset) {
+  if(c>='a' && c<='z')
+    return (char) ('a' + ( (c-'a'+offset)%26 ));
+  if (c>='A' && c<='Z')
+    return (char) ('A' + ( (c-'A'+offset)%26 ));
+  return c;
+}
+
 int main(int argc, char const *argv[]) {
     
-    if(argc != 3) {
+    if(argc != 2) {
         perror("Il faut uniquement un nom de fichier en paramètre.");
         return -1;
     } 
 
-    int src = open(argv[1], O_RDONLY);
-    int dest = open(argv[2], O_RDWR | O_CREAT, 0775);
+    int a = open(argv[1], O_RDONLY);
 
-    if(src == -1 || dest == -1) {
+    if(a == -1) {
         perror("Impossible d'ouvrir le fichier.");
         return -1;
     }
@@ -30,30 +37,19 @@ int main(int argc, char const *argv[]) {
 
     size_t length = sb.st_size;
 
-    char *mapSrc = mmap(0, length, PROT_READ, MAP_PRIVATE, src, 0);
+    char *w = mmap(0, length, PROT_WRITE | PROT_READ, MAP_PRIVATE, a, 0);
 
-    if(mapSrc == MAP_FAILED) {
+    if(w == MAP_FAILED) {
         perror("Erreur de lecture");
         return -1;
     }
 
-    if(ftruncate(dest, length) == -1) {
-        perror("Erreur de truncate.");
-        return -1;
+    for(unsigned int i = 0; i < length; i++) {
+        w[i] = cesar(w[i], 1);
     }
 
-
-    char *mapDest = mmap(0, length, PROT_READ | PROT_WRITE, MAP_SHARED, dest, 0);
-    
-    memcpy(mapDest, mapSrc, length);
-
-    if(msync(mapDest, length, MS_SYNC) == -1) {
-        perror("Erreur de sync.");
-        return -1;
-    }
-
-    close(src);
-    close(dest);
+    printf("%s", w);
+    close(a);
 
     return 0;
 }
