@@ -36,7 +36,7 @@ int main(int argc, char const *argv[]) {
     }
 
     size_t length = sb.st_size;
-
+ 
     char *w = mmap(0, length, PROT_WRITE | PROT_READ, MAP_PRIVATE, a, 0);
 
     if(w == MAP_FAILED) {
