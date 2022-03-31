@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <time.h>
 #include <signal.h>
 
 #define PRECISION 8 // pour la probabilité que la balle sorte
@@ -58,45 +59,81 @@ void handler(int sig)
 /**************************** main ****************************/
 int main(int argc, char **argv)
 {
-  struct sigaction action;
+  struct sigaction signal;
+
+  srand(time(NULL));
 
   /* préparation commune */
 
+  signal.sa_handler = handler;
+  sigfillset(&signal.sa_mask);
+  signal.sa_flags = 0;
+
+  if (sigaction(SIGUSR1, &signal, NULL) > 0)
+  {
+    exit(1);
+  }
+
+  if (sigaction(SIGUSR2, &signal, NULL) > 0)
+  {
+    exit(1);
+  }
+
   /* clonage */
-  switch (fork())
+  int pid = fork();
+  switch (pid)
   {
   case -1: // erreur
     perror("fork : ");
     exit(EXIT_FAILURE);
   case 0:
+    couleur = vert;
+    bruit = pong;
+    adversaire = getppid();
 
-    struct sigaction signal;
-    signal.sa_handler = handler;
-    sigfillset(&signal.sa_mask);
-    signal.sa_flags = 0;
-
-    if (sigaction(SIGUSR1, &signal, NULL) > 0)
+    while (1)
     {
-      exit(1);
-    }
+      pause();
+      sleep(1);
 
-    if (sigaction(SIGUSR2, &signal, NULL) > 0)
-    {
-      exit(1);
+      if (rand() % PRECISION == 2)
+      {
+        crie_victoire();
+      }
+      else
+      {
+        tape_la_balle();
+      }
     }
 
     break;
   default:
     /* initialisation spécifique au père */
     /* le père est au service */
+    couleur = bleu;
+    bruit = ping;
+    adversaire = pid;
+
+    sleep(3);
+
     tape_la_balle();
   }
 
   /* la partie continue */
-
+  int i = 0;
   while (1)
   {
     pause();
+    sleep(1);
+    if (i == PRECISION)
+    {
+      crie_victoire();
+    }
+    else
+    {
+      tape_la_balle();
+    }
+    i++;
     /* autres actions ? */
   }
 }
