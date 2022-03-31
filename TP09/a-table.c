@@ -4,6 +4,7 @@
 #include <time.h>
 #include <unistd.h>
 #include <sys/types.h>
+#include <sys/wait.h>
 
 void handler( int sig ){
     
@@ -42,6 +43,16 @@ int main(int argc, char const *argv[]) {
 
     for(int i = 0; i < 4; i++) {
         kill(fils[i], SIGUSR1); 
+    }
+
+    for(int i = 0; i < 4; i++) {
+
+        int status;
+        while(waitpid(fils[i], &status, WNOHANG) > 0) {
+            printf("[PERE] Bon appetit %i !\n", fils[i]);
+            break;
+        }
+
     }
        
 
