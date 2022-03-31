@@ -47,11 +47,7 @@ int main(int argc, char const *argv[]) {
 
     for(int i = 0; i < 4; i++) {
 
-        int status;
-        while(waitpid(fils[i], &status, WNOHANG) > 0) {
-            printf("[PERE] Bon appetit %i !\n", fils[i]);
-            break;
-        }
+        printf("[PERE] Bon appetit %i !\n", wait(0));
 
     }
        
