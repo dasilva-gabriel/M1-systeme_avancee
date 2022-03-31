@@ -23,48 +23,41 @@ int main(int argc, char const *argv[])
 
 }*/
 
-void handler( int sig ){}
+void handler(int sig) {}
 
-int main(int argc, char const *argv[]) {
-    
+int main(int argc, char const *argv[])
+{
+
+    struct sigaction signal;
+    signal.sa_handler = handler;
+    sigfillset(&signal.sa_mask);
+    signal.sa_flags = 0;
+
+    if (sigaction(SIGUSR1, &signal, NULL) > 0)
+    {
+        exit(1);
+    }
+
     int pid = fork();
-    if (pid == 0) {
+    if (pid == 0)
+    {
 
         printf("ping\n");
 
-        struct sigaction signal;
-        signal.sa_handler = handler;
-        sigfillset(&signal.sa_mask);
-        signal.sa_flags = 0;
-
-        if( sigaction(SIGUSR1, &signal, NULL) > 0) {
-            exit(1);
-        }
-            
         kill(getppid(), SIGUSR1);
         pause();
 
         printf("pang\n");
+    }
+    else
+    {
 
-    } else {
-
-        struct sigaction signal;
-        signal.sa_handler = handler;
-        sigfillset(&signal.sa_mask);
-        signal.sa_flags = 0;
-
-        if( sigaction(SIGUSR1, &signal, NULL) > 0) {
-            exit(1);
-        }
-            
         pause();
 
         printf("pong\n");
 
         kill(pid, SIGUSR1);
-
     }
-    
 
     return 0;
 }
