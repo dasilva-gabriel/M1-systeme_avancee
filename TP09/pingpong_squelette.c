@@ -96,7 +96,9 @@ int main(int argc, char **argv)
       pause();
       sleep(1);
 
-      if (rand() % PRECISION == 2)
+      int nbgen=rand()%PRECISION+1;
+
+      if (nbgen == 2)
       {
         crie_victoire();
       }
@@ -114,7 +116,7 @@ int main(int argc, char **argv)
     bruit = ping;
     adversaire = pid;
 
-    sleep(3);
+    sleep(1);
 
     tape_la_balle();
   }
@@ -125,7 +127,10 @@ int main(int argc, char **argv)
   {
     pause();
     sleep(1);
-    if (i == PRECISION)
+
+    int nbgen=rand()%PRECISION+1;
+
+    if (nbgen == 2)
     {
       crie_victoire();
     }

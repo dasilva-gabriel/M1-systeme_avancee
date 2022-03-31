@@ -47,7 +47,7 @@ int main(int argc, char const *argv[])
         kill(getppid(), SIGUSR1);
         pause();
 
-        printf("pang\n");
+        printf("pang\n\n");
     }
     else
     {
