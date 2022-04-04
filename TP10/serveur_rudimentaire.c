@@ -3,9 +3,11 @@
 #include <string.h>
 #include <sys/un.h>
 #include <stdbool.h>
+#include <stdlib.h>
 #include <stddef.h>
+#include <unistd.h>
 
-#define NB_MAX = 3;
+#define NB_MAX 3
 
 int main(int argc, char const *argv[])
 {
@@ -27,11 +29,11 @@ int main(int argc, char const *argv[])
         exit(1);
     }
 
-#define BACKLOG 5
-    while (true)
+    int i = 0; 
+    while (i < NB_MAX)
     {
 
-        if (listen(desc, BACKLOG) < 0)
+        if (listen(desc, 1) < 0)
         {
             printf("Erreur listen\n");
             exit(1);
@@ -43,6 +45,9 @@ int main(int argc, char const *argv[])
             printf("Erreur accept\n");
             exit(1);
         }
+
+        i++;
+        printf("La connexion n°%i a été prise en compte.\n", i);
     }
     return 0;
 }
