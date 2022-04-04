@@ -29,7 +29,7 @@ int main(int argc, char const *argv[])
         exit(1);
     }
 
-    int i = 0; 
+    int i = 0;
     while (i < NB_MAX)
     {
 
@@ -48,6 +48,26 @@ int main(int argc, char const *argv[])
 
         i++;
         printf("La connexion n°%i a été prise en compte.\n", i);
+
+        if (fork() == 0)
+        {
+
+            int i;
+            ssize_t v;
+            while ((v = read(con, &i, sizeof(i))) > 0)
+            {
+                if (v != sizeof(i))
+                {
+                    printf("Erreur read\n");
+                    exit(1);
+                }
+                i++;
+
+                write(con, &i, sizeof(i));
+
+                printf("Enfant %ld créé\n", (long) getpid() );
+            }
+        }
+        return 0;
     }
-    return 0;
 }
